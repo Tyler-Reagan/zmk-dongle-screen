@@ -216,4 +216,16 @@ config DONGLE_SCREEN_SYSTEM_ICON
     help
         The icon to display when the 'LGUI'/'RGUI' is pressed. Can be used to better match the Mod Widget to the underlying system.
         (0: macOS, 1: Linux, 2: Windows)
+
+config DONGLE_SCREEN_BACKGROUND_IMAGE
+    bool "Enable custom background image"
+    default n
+    help
+      When enabled, renders a custom background image behind all widgets.
+      Replace src/images/background.c with your own converted image.
+      The image must be 280x240 pixels (horizontal) or 240x280 (vertical),
+      in RGB565 format with byte-swap enabled, exported as a C array from
+      the LVGL image converter (https://lvgl.io/tools/imageconverter).
+      The exported variable must be named dongle_screen_background.
+
 endif

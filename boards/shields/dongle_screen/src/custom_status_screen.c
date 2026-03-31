@@ -34,6 +34,10 @@ static struct zmk_widget_mod_status mod_widget;
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
+#if CONFIG_DONGLE_SCREEN_BACKGROUND_IMAGE
+extern const lv_img_dsc_t dongle_screen_background;
+#endif
+
 lv_style_t global_style;
 
 lv_obj_t *zmk_display_status_screen()
@@ -43,6 +47,12 @@ lv_obj_t *zmk_display_status_screen()
     screen = lv_obj_create(NULL);
     lv_obj_set_style_bg_color(screen, lv_color_hex(0x000000), LV_PART_MAIN);
     lv_obj_set_style_bg_opa(screen, 255, LV_PART_MAIN);
+
+#if CONFIG_DONGLE_SCREEN_BACKGROUND_IMAGE
+    lv_obj_t *bg = lv_img_create(screen);
+    lv_img_set_src(bg, &dongle_screen_background);
+    lv_obj_align(bg, LV_ALIGN_CENTER, 0, 0);
+#endif
 
     lv_style_init(&global_style);
     // lv_style_set_text_font(&global_style, &lv_font_unscii_8); // ToDo: Font is not recognized

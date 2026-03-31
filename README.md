@@ -260,6 +260,54 @@ To achieve this, an appropriate configuration for the specific microcontroller m
 
 After flashing the reset file, the pairing process should be repeated in the sequence described above to ensure correct mapping of the battery indicators.
 
+## Custom Background Image
+
+You can replace the solid black background with any image of your choice.
+
+### 1. Prepare your image
+
+Create or export your image as a PNG at:
+- **280×240 px** if using horizontal orientation (`CONFIG_DONGLE_SCREEN_HORIZONTAL=y`)
+- **240×280 px** if using vertical orientation
+
+### 2. Convert to LVGL C array
+
+Go to the [LVGL Image Converter](https://lvgl.io/tools/imageconverter) and configure:
+
+| Setting | Value |
+|---|---|
+| Color format | `CF_TRUE_COLOR` |
+| Output format | `C Array` |
+| Swap color bytes | **Checked** (required — `LV_COLOR_16_SWAP` is enabled) |
+
+Download the generated `.c` file.
+
+### 3. Replace the placeholder
+
+Replace the contents of `boards/shields/dongle_screen/src/images/background.c` with your generated file. Then rename the exported `lv_img_dsc_t` variable at the bottom of that file to `dongle_screen_background`:
+
+```c
+// Change this:
+const lv_img_dsc_t my_image_name = { ... };
+
+// To this:
+const lv_img_dsc_t dongle_screen_background = { ... };
+```
+
+### 4. Enable in your dongle config
+
+Add the following to your dongle `.conf` file (e.g. `totem_dongle.conf`):
+
+```conf
+CONFIG_DONGLE_SCREEN_BACKGROUND_IMAGE=y
+```
+
+### 5. Rebuild and flash
+
+Trigger a new build and flash the resulting `totem_dongle.uf2` to your dongle. The image will appear behind all widgets.
+
+---
+
 ## Development
 
 If you want to develop new features or change the layout of the screen you'll have to clone this repo and build it on your own.  
