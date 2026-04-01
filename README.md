@@ -1,330 +1,280 @@
-# ZMK Dongle Screen YADS (Yet another Dongle Screen)
+# ZMK Dongle Screen — TOTEM (Dongle Setup)
 
-This project provides a Zephyr module for a dongle display shield based on the ST7789V display and the Seeeduino XAIO BLE microcontroller and the LVGL graphics library.  
-The display can take advantage of a ambient light sensor to dim and brighten the display automatically.  
-It offers various widgets for current output, displaying layer, mod, WPM, and battery status, as well as brightness adjustments via keyboard, automatic dimming after inactivity, and a customizable status screen for ZMK-based keyboards.
+Personal ZMK firmware for the [TOTEM](https://github.com/GEIGEIGEIST/TOTEM) — a 38-key column-staggered wireless split keyboard using three [Seeed XIAO nRF52840](https://wiki.seeedstudio.com/XIAO-nRF52840/) microcontrollers: left half, right half, and a dedicated USB dongle with a ST7789V status display.
 
-**This project is inspired by [prospector-zmk-module](https://github.com/carrefinho/prospector-zmk-module) and [zmk-dongle-display](https://github.com/englmaxi/zmk-dongle-display). Thanks for your awesome work!**
+**This repo is for the dongle setup**: both keyboard halves connect wirelessly as BLE peripherals to the dongle, which plugs into your computer via USB and serves as the USB HID + ZMK Studio endpoint. The dongle displays live status (layer, modifiers, WPM, output, battery) on a small screen.
 
-## Note on current ZMK main branch
-
-As the ZMK main branch moved to Zephyr 4.1 the latest release of YADS is not compatible with that branch.
-If you want to build the main branch of ZMK please have a look at this [issue](https://github.com/janpfischer/zmk-dongle-screen/issues/29).
-
-In short you can use YADS already with Zephyr 4.1 if you are building with the YADS branch `upgrade-4.1`. Furthermore you'll have to adjust your `west.yaml` with the other references and change the board reference in the `build.yaml` to `xiao_ble//zmk` (if not using a nice!nano `nice_nano@2.0.0//zmk`).
-
-## Demo
-
-![Sample Screen of zmk-dongle-screen](/docs/images/screen.jpg)
-
-<https://github.com/user-attachments/assets/86c33af6-d83e-4e2a-9766-fc8836e896f1>
-
-### Brightness changes with ambient light sensor and screen toggle
-
-<https://github.com/user-attachments/assets/3379f79c-af90-4763-8ba5-8a8f34fd66cf>
-
-## Building a dongle
-
-To build a dongle yourself you can use the build guide by **carrefinho** ([prospector project](https://github.com/carrefinho/prospector)) based on the Seeed Studio XIAO nRF52840.
-
-nice!nano v2 supported. [Wiring guide](/docs/nice_nano_wire_guide.md).
-
-This repository only contains a module and no build guides or suggestions.
-
-## Widgets Overview
-
-This module provides several widgets to visualize the current state of your ZMK-based keyboard:
-
-- **Output Widget**  
-  Indicates the current output state of the keyboard (USB or BLE profiles). The currently used interface (USB or BLE) is indicated with an arrow.
-  - **USB:**
-    - **White:** USB HID is ready and active (dongle is connected to a computer and working as a keyboard).
-    - **Red:** USB HID is not ready (dongle is powered, e.g. via wall plug or power bank, but not connected to a computer).
-  - **BLE:**  
-    For the currently selected Bluetooth profile (the number is shown in the next line):
-    - **Green:** Connected (active BLE connection established)
-    - **Blue:** Bonded (device is paired, but not currently connected)
-    - **White:** Profile is free (no device paired or connected for this profile)
-
-- **Layer Widget**  
-  Displays the currently active keyboard layer. Useful for quickly identifying which layer is active.
-
-- **Mod Widget**  
-  Shows the status of modifier keys (e.g., Shift, Ctrl, Alt, GUI). Indicates which modifiers are currently pressed.
-
-- **WPM Widget**  
-  Displays the current words per minute (WPM) typing speed in real time.
-
-- **Battery Widget**  
-  Shows the battery level of the dongle and/or the keyboard, if supported.
-
-## General Features
-
-- **Custom Status Screen**  
-  Combine and arrange widgets as you like for a fully customizable status display. (Code changes and recompiling are needed for this.)
-
-- **Deactivate Screen Modules via configuration**  
-  If you don't need a specific module to be shown (like WPM) you can simple disable them via configuration. No code changes are needed for this.
-
-- **Ambient light sensor adjustment**
-  This module supports ambient light sensors. Tested is the `Adafruit APDS9960` sensor.  
-  Using the sensor allows to adjust the lightning to the ambient light level. This can be modified by the `Brightness Control` keys to apply a positive or negative modifier.  
-  If you want to use this feature you'll have to enable it via configuration. Please refer to the configuration overview below.
-
-- **Toggle the display via Keyboard**  
-  Toggle the display off and on via keyboard shortcut. By default F22 is mapped to this. You'll just have to assign this in your keyboard keymap.  
-  When the display is turned off via toggle and the idle timeout is reached the display will turn on once a new activity is recognized.
-
-- **Brightness Control**  
-  Adjust the display brightness via keyboard shortcuts. By default, F23 and F24 are mapped to this. You'll just have to assign this in your keyboard keymap.
-
-- **Configurable Display Orientation**  
-  Set the screen orientation to match your keyboard or desk setup (horizontal or vertical). Additionally, the screen can be flipped to match the orientation of the display in your casing.
-
-- **Idle Timeout**  
-  Automatically turns off or dims the display after a configurable period of inactivity (no keystrokes). It automatically turns on when the first keystroke is detected again.  
-  The idle timeout can be set in seconds. If set to `0`, the display will never dim or turn off automatically.  
-  When the idle timeout is reached, the display brightness will be set to 0.  
-  When activity resumes, the brightness will be restored to the last value (up to `DONGLE_SCREEN_MAX_BRIGHTNESS`).  
-
-## Installation
-
-**ZMK version compatability**
-YADS needs ZMK version `0.3.0` to be build.
-Currently the main branch of YADS does not support ZMK `main` branch as this was already upgraded to Zephyr 4.1. However there is already a branch which supports the new ZMK Zephyr 4.1 version and therefore the current main branch.
-To follow the development please refer to: <https://github.com/janpfischer/zmk-dongle-screen/issues/29>
-
-1. This guide assumes that you have already implemented a basic dongle setup as described [here](https://zmk.dev/docs/development/hardware-integration/dongle).
-2. Once this is done, add this repository to your `west.yaml`.  
-   Example:
-
-   ```yaml
-   manifest:
-     remotes:
-       - name: zmkfirmware
-         url-base: https://github.com/zmkfirmware
-       - name: janpfischer
-         url-base: https://github.com/janpfischer
-     projects:
-       - name: zmk
-         remote: zmkfirmware
-         revision: 0.3.0 # or main if newer than 0.3.0
-         import: app/west.yml
-       - name: zmk-dongle-screen
-         remote: janpfischer
-         revision: main
-     self:
-       path: config
-   ```
-
-   Note: If you want to pin the release of `zmk-dongle-screen` or `zmk` in general you can update the `revision` to use a tag or commit SHA.
-  
-   Example for using `zmk-dongle-screen` version 0.0.1:
-
-   ```yaml
-   - name: zmk-dongle-screen
-     remote: janpfischer
-     revision: 0.0.1
-   ```
-
-3. The shield must be included in your build configuration for the dongle you set up in step 1.  
-   Example `build.yaml` snippet:
-
-   ```yaml
-   include:
-     - board: seeeduino_xiao_ble
-       shield: [YOUR_CONFIGURED_DONGLE] dongle_screen
-       #cmake-args: -DCONFIG_LOG_PROCESS_THREAD_STARTUP_DELAY_MS=8000 #optional if logging is enabled
-       #snippet: zmk-usb-logging #only enable for debugging
-       artifact-name: dongle-screen
-   ```
-
-4. Keyboard splits must be configured as peripherals.  
-   Example `build.yaml` snippet:
-
-   ```yaml
-   include:
-     - board: seeeduino_xiao_ble
-       shield: split_left
-       cmake-args: -DCONFIG_ZMK_SPLIT=y -DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=n
-       artifact-name: split-dongle-left
-     - board: seeeduino_xiao_ble
-       shield: split_right
-       cmake-args: -DCONFIG_ZMK_SPLIT=y -DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=n
-       artifact-name: split-dongle-right
-   ```
-
-5. Adjust the desired configuration options in your `[YOUR_CONFIGURED_DONGLE].conf` (see table below).
-
-### Configuration sample
-
-A sample `build.yaml` based on `seeeduino_xiao_ble` boards for the keyboard and the dongle including a `settings_reset` firmware could look like this:
-
-```yaml
-include:
-  - board: seeeduino_xiao_ble
-    shield: totem_left
-    cmake-args: -DCONFIG_ZMK_SPLIT=y -DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=n
-    artifact-name: totem-dongle-left
-  - board: seeeduino_xiao_ble
-    shield: totem_right
-    cmake-args: -DCONFIG_ZMK_SPLIT=y -DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=n
-    artifact-name: totem-dongle-right
-  - board: seeeduino_xiao_ble
-    shield: totem_dongle dongle_screen
-    cmake-args: -DCONFIG_LOG_PROCESS_THREAD_STARTUP_DELAY_MS=8000
-    snippet: zmk-usb-logging
-    artifact-name: totem-dongle-screen
-  - board: seeeduino_xiao_ble
-    shield: settings_reset
-    artifact-name: totem-settings-reset
-```
-
-## Configuration Options
-
-| Name                                                           | Type | Default                        | Description                                                                                                                                                                                                                                  |
-| -------------------------------------------------------------- | ---- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CONFIG_DONGLE_SCREEN_HORIZONTAL`                              | bool | y                              | Orientation of the screen. By default, it is horizontal (laying on the side).                                                                                                                                                                |
-| `CONFIG_DONGLE_SCREEN_FLIPPED`                                 | bool | n                              | Should the screen orientation be flipped in horizontal or vertical orientation?                                                                                                                                                              |
-| `CONFIG_DONGLE_SCREEN_SYSTEM_ICON`                             | int  | 0                              | The icon to display when the 'LGUI'/'RGUI' is pressed. (0: macOS, 1: Linux, 2: Windows)                                                                                                                                                      |
-| `CONFIG_DONGLE_SCREEN_AMBIENT_LIGHT`                           | bool | n                              | If enabled, the ambient light sensor will be used to automatically adjust screen brightness.                                                                                                                                                 |
-| `CONFIG_DONGLE_SCREEN_AMBIENT_LIGHT_EVALUATION_INTERVAL_MS`    | int  | 1000                           | The interval how often the ambient light level should be evaluated.                                                                                                                                                                          |
-| `CONFIG_DONGLE_SCREEN_AMBIENT_LIGHT_MIN_RAW_VALUE`             | int  | 0                              | Depending on the position and if the sensor is behind transparent plastic or not the sensor readings can be vary. Behind plastic the default value is proven good. If your ambient light changes are not too reactive you might change this. |
-| `CONFIG_DONGLE_SCREEN_AMBIENT_LIGHT_MAX_RAW_VALUE`             | int  | 100                            | Depending on the position and if the sensor is behind transparent plastic or not the sensor readings can be vary. Behind plastic the default value is proven good. If your ambient light changes are not too reactive you might change this. |
-| `CONFIG_DONGLE_SCREEN_IDLE_TIMEOUT_S`                          | int  | 600                            | Screen idle timeout in seconds (0 = never off). Time in seconds after which the screen turns off when idle.                                                                                                                                  |
-| `CONFIG_DONGLE_SCREEN_MAX_BRIGHTNESS`                          | int  | 80                             | Maximum screen brightness (1-100). This is the brightness used when the dongle is powered on and the maximum used by the dimmer.                                                                                                             |
-| `CONFIG_DONGLE_SCREEN_MIN_BRIGHTNESS`                          | int  | 1                              | Minimum screen brightness (1-99). This is the brightness used as a minimum value for brightness adjustments with the modifier keys and the ambient light sensor.                                                                             |
-| `CONFIG_DONGLE_SCREEN_DEFAULT_BRIGHTNESS`                      | int  | `DONGLE_SCREEN_MAX_BRIGHTNESS` | The initial brightness level for the screen backlight. This value is used at startup and when the screen is turned on. It is defaulted to the MAX brightness but can be overridden. Must be between MIN and MAX brightness values.           |
-| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_MODIFIER`                     | int  | 0                              | The modifier to start the dongle with. Useful if you found a modifier comfortable for you. Espacially for ambient light. Otherwise no need to change.                                                                                        |
-| `CONFIG_DONGLE_SCREEN_TOGGLE_KEYCODE`                          | int  | 113                            | Keycode that toggles the screen off and on (default: F22).                                                                                                                                                                                   |
-| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_KEYBOARD_CONTROL`             | bool | y                              | Allows controlling the screen brightness via keyboard (e.g., F23/F24).                                                                                                                                                                       |
-| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_UP_KEYCODE`                   | int  | 115                            | Keycode for increasing screen brightness (default: F24).                                                                                                                                                                                     |
-| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_DOWN_KEYCODE`                 | int  | 114                            | Keycode for decreasing screen brightness (default: F23).                                                                                                                                                                                     |
-| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_STEP`                         | int  | 10                             | Step for brightness adjustment with keyboard. How much brightness (range MIN_BRIGHTNESS to MAX_BRIGHTNESS) should be applied per keystroke.                                                                                                  |
-| `CONFIG_DONGLE_SCREEN_WPM_ACTIVE`                              | bool | y                              | If the WPM Widget should be active or not.                                                                                                                                                                                                   |
-| `CONFIG_DONGLE_SCREEN_MODIFIER_ACTIVE`                         | bool | y                              | If the Modifier Widget should be active or not.                                                                                                                                                                                              |
-| `CONFIG_DONGLE_SCREEN_LAYER_ACTIVE`                            | bool | y                              | If the Layer Widget should be active or not.                                                                                                                                                                                                 |
-| `CONFIG_DONGLE_SCREEN_OUTPUT_ACTIVE`                           | bool | y                              | If the Output Widget should be active or not.                                                                                                                                                                                                |
-| `CONFIG_DONGLE_SCREEN_BATTERY_ACTIVE`                          | bool | y                              | If the Battery Widget should be active or not.                                                                                                                                                                                               |
-| `CONFIG_DONGLE_SCREEN_AMBIENT_LIGHT_TEST`                      | bool | n                              | If enabled, the ambient light sensor will be mocked to adjust screen brightness.                                                                                                                                                             |
-
-## Example Configuration (`prj.conf`)
-
-```conf
-CONFIG_DONGLE_SCREEN_HORIZONTAL=y
-CONFIG_DONGLE_SCREEN_FLIPPED=n
-CONFIG_DONGLE_SCREEN_AMBIENT_LIGHT=y
-CONFIG_DONGLE_SCREEN_IDLE_TIMEOUT_S=300
-CONFIG_DONGLE_SCREEN_MAX_BRIGHTNESS=90
-CONFIG_DONGLE_SCREEN_MIN_BRIGHTNESS=10
-CONFIG_DONGLE_SCREEN_DEFAULT_BRIGHTNESS=30
-CONFIG_DONGLE_SCREEN_BRIGHTNESS_KEYBOARD_CONTROL=y
-CONFIG_DONGLE_SCREEN_BRIGHTNESS_UP_KEYCODE=115
-CONFIG_DONGLE_SCREEN_BRIGHTNESS_DOWN_KEYCODE=114
-CONFIG_DONGLE_SCREEN_BRIGHTNESS_STEP=5
-```
-
-## Pairing
-
-The battery widget assigns the battery indicators from left to right, based on the sequence in which the keyboard halves are paired to the dongle.
-
-For split keyboards, it is essential to pair the left half first after flashing the dongle, followed by the right half. This ensures the correct mapping of battery status indicators and avoids swapped displays in the widget.
-
-The recommended procedure is as follows:
-
-1. Switch off both keyboard halves.
-2. Flash the dongle
-3. Disconnect the dongle
-4. Flash the left half
-5. Flash the right half
-6. Reconnect the dongle
-7. Switch on the left half and wait until the battery indicator appears on the dongle
-8. Switch on the right half
-
-### Reset Dongle
-
-If the dongle has already been paired with both keyboard halves and the battery widget displays swapped indicators (i.e., the left battery indicator refers to the right keyboard half), a full reset of the dongle is required.
-
-To achieve this, an appropriate configuration for the specific microcontroller must be added to the `build.yaml` in order to generate a `settings_reset-[microcontroller-name]-zmk.uf2` image. This image enables the complete removal of all stored pairing data from the dongle.
-
-```yaml
-  include:
-...
-  - board: seeeduino_xiao_ble
-    shield: settings_reset
-
-  - board: nice_nano_v2
-    shield: settings_reset
-...
-```
-
-After flashing the reset file, the pairing process should be repeated in the sequence described above to ensure correct mapping of the battery indicators.
-
-## Custom Background Image
-
-You can replace the solid black background with any image of your choice.
-
-### 1. Prepare your image
-
-Create or export your image as a PNG at:
-- **280×240 px** if using horizontal orientation (`CONFIG_DONGLE_SCREEN_HORIZONTAL=y`)
-- **240×280 px** if using vertical orientation
-
-### 2. Convert to LVGL C array
-
-Go to the [LVGL Image Converter](https://lvgl.io/tools/imageconverter) and configure:
-
-| Setting | Value |
-|---|---|
-| Color format | `CF_TRUE_COLOR` |
-| Output format | `C Array` |
-| Swap color bytes | **Checked** (required — `LV_COLOR_16_SWAP` is enabled) |
-
-Download the generated `.c` file.
-
-### 3. Replace the placeholder
-
-Replace the contents of `boards/shields/dongle_screen/src/images/background.c` with your generated file. Then rename the exported `lv_img_dsc_t` variable at the bottom of that file to `dongle_screen_background`:
-
-```c
-// Change this:
-const lv_img_dsc_t my_image_name = { ... };
-
-// To this:
-const lv_img_dsc_t dongle_screen_background = { ... };
-```
-
-### 4. Enable in your dongle config
-
-Add the following to your dongle `.conf` file (e.g. `totem_dongle.conf`):
-
-```conf
-CONFIG_DONGLE_SCREEN_BACKGROUND_IMAGE=y
-```
-
-### 5. Rebuild and flash
-
-Trigger a new build and flash the resulting `totem_dongle.uf2` to your dongle. The image will appear behind all widgets.
+> **No dongle?** See [zmk-config-studio](https://github.com/Tyler-Reagan/zmk-config-studio) — a separate repo for the simpler two-piece setup (left half as USB central, ZMK Studio via left half directly).
 
 ---
 
-## Development
+## Hardware
 
-If you want to develop new features or change the layout of the screen you'll have to clone this repo and build it on your own.  
-Refer to the [ZMK Local toolchain](https://zmk.dev/docs/development/local-toolchain/build-flash) documentation for this.
+Three XIAO nRF52840 boards:
 
-A command for building locally _can_ look something like this:
+| Piece | Firmware artifact | Role |
+|---|---|---|
+| Left half | `totem_left` | BLE peripheral — sends key events to dongle |
+| Right half | `totem_right` | BLE peripheral — sends key events to dongle |
+| Dongle | `totem_dongle` | USB central — HID + ZMK Studio + ST7789V display |
+
+The dongle display shows: output mode (USB/BLE), active layer, active modifiers, WPM, and battery levels for both halves.
+
+---
+
+## Repo structure
 
 ```
-west build -p -s /workspaces/zmk/app -d "/workspaces/zmk-build-output/totem_dongle" -b "seeeduino_xiao_ble" -S zmk-usb-logging -- -DZMK_CONFIG=/workspaces/zmk-config/config -DSHIELD="totem_dongle dongle_screen" -DZMK_EXTRA_MODULES=/workspaces/zmk-modules/zmk-dongle-screen/
+config/
+  totem.keymap              ← keymap (edit this)
+  totem_left_dongle.conf    ← left peripheral config (bootloader support)
+  totem_right.conf          ← right peripheral config (bootloader support)
+  totem_dongle.conf         ← dongle config (bootloader support)
+  west.yml                  ← ZMK west manifest
+
+boards/shields/
+  totem/                    ← TOTEM keyboard shield (dongle variants)
+    totem.dtsi              ← base matrix / kscan
+    totem-layouts.dtsi      ← physical key positions (ZMK Studio)
+    totem_left_dongle.overlay ← left half GPIO (peripheral mode)
+    totem_right.overlay     ← right half GPIO (peripheral mode)
+    totem_dongle.overlay    ← dongle mock kscan
+    totem_dongle.conf       ← dongle screen preferences (orientation, brightness, timeout)
+    Kconfig.shield          ← shield Kconfig symbols
+    Kconfig.defconfig       ← dongle split role / BT connection defaults
+    totem.zmk.yml           ← ZMK shield metadata
+
+  dongle_screen/            ← dongle screen Zephyr module
+    boards/
+      xiao_ble_zmk.overlay  ← SPI/display/PWM hardware (XIAO BLE pinout)
+    src/
+      widgets/              ← layer, mod, WPM, battery, output widgets
+      fonts/                ← NerdFonts (20px, 40px)
+      custom_status_screen.c
+      brightness.c
+    dongle_screen.conf      ← display module defaults
+    CMakeLists.txt
+
+drivers/display/
+  display_st7789v.c         ← ST7789V display driver
+  display_st7789v.h
+
+build.yaml                  ← GitHub Actions build matrix
+Makefile                    ← workflow helper (requires gh CLI)
+.github/workflows/
+  build.yml                 ← GitHub Actions build workflow
+zephyr/module.yml           ← Zephyr module declaration
+CMakeLists.txt              ← module build entry point
+Kconfig                     ← module Kconfig
 ```
 
-_Note: a matching entry for `-DSHIELD` must already be present in your `build.yaml` in your configuration, which is given as the `-DZMK_CONFIG` argument._
+---
+
+## Makefile workflow
+
+Requires the [GitHub CLI](https://cli.github.com/) (`gh`). ZMK firmware is built in GitHub Actions — the Makefile wraps `gh` commands for convenience.
+
+```
+make help            Show all targets and workflow summary
+make build           Trigger a GitHub Actions build
+make status          List recent build runs (latest 5)
+make download        Download firmware artifacts → firmware/
+make flash-left      Copy left UF2 to mounted XIAO bootloader drive
+make flash-right     Copy right UF2 to mounted XIAO bootloader drive
+make flash-dongle    Copy dongle UF2 to mounted XIAO bootloader drive
+```
+
+### Typical workflow
+
+```sh
+# 1. Edit your keymap
+vim config/totem.keymap
+
+# 2. Trigger a build
+make build
+
+# 3. Check when it finishes
+make status
+
+# 4. Download artifacts once the build succeeds
+make download
+# → firmware/totem_left/zmk.uf2
+# → firmware/totem_right/zmk.uf2
+# → firmware/totem_dongle/zmk.uf2
+
+# 5. Flash each device (double-tap reset first to enter bootloader)
+make flash-left
+make flash-right
+make flash-dongle
+```
+
+> The `BOOT_LEFT`, `BOOT_RIGHT`, and `BOOT_DONGLE` variables default to `/Volumes/XIAO-SENSE`. Override if needed:
+> ```sh
+> make flash-dongle BOOT_DONGLE=/Volumes/XIAO
+> ```
+
+---
+
+## Flashing
+
+### Enter bootloader mode
+
+**Double-tap the reset button** on the XIAO — the drive mounts as `XIAO-SENSE` (or `XIAO`) automatically. Or hold the boot button while plugging in USB.
+
+Flash one device at a time. The halves can be left wireless (off or on battery) while you flash the other — they don't need to be disconnected.
+
+### First-time setup
+
+Pairing order matters for the battery widget — the dongle assigns battery indicators in the order halves first connect. Always pair left before right.
+
+1. Flash `settings_reset` to all three devices to clear any stale bond data.
+2. Flash `totem_dongle` to the dongle.
+3. Flash `totem_left` to the left half.
+4. Flash `totem_right` to the right half.
+5. Connect the dongle to USB. Power on the **left half** and wait until its battery indicator appears on the dongle screen.
+6. Power on the **right half**.
+7. The dongle advertises to your computer as **TOTEM** via USB HID — no Bluetooth pairing needed on the host side.
+
+### Subsequent updates
+
+Reflash whichever devices have changed. Bond data is preserved unless you flash `settings_reset`.
+
+---
+
+## ZMK Studio
+
+[ZMK Studio](https://zmk.studio/) lets you remap keys live over USB without reflashing.
+
+- Connect the **dongle** to your computer via USB.
+- Open [zmk.studio](https://zmk.studio/) in a Chromium-based browser.
+- **TOTEM** appears automatically.
+- Changes are written to the dongle's flash instantly.
+
+Studio locking is disabled — no unlock sequence required. Studio changes persist across power cycles but are overwritten on the next firmware flash.
+
+> ZMK Studio connects to the **dongle** in this setup, not the keyboard halves.
+
+---
+
+## Dongle screen
+
+The screen runs on the `dongle_screen` Zephyr module (bundled in this repo). It displays:
+
+- **Output** — current output mode (USB or BLE). Arrow indicates active interface. USB is white when active, red when powered but not connected. BLE profiles are green (connected), blue (bonded), or white (free).
+- **Layer** — currently active keymap layer.
+- **Modifiers** — live modifier key state (Shift, Ctrl, Alt, GUI).
+- **WPM** — real-time words-per-minute.
+- **Battery** — battery level for each keyboard half.
+
+### Screen configuration
+
+User preferences live in [`boards/shields/totem/totem_dongle.conf`](boards/shields/totem/totem_dongle.conf):
+
+```conf
+CONFIG_DONGLE_SCREEN_HORIZONTAL=y    # Horizontal orientation (default)
+CONFIG_DONGLE_SCREEN_IDLE_TIMEOUT_S=600  # Screen off after 10 min idle (0 = never)
+CONFIG_DONGLE_SCREEN_MAX_BRIGHTNESS=80   # Max brightness (1–100)
+```
+
+Full configuration reference:
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `CONFIG_DONGLE_SCREEN_HORIZONTAL` | bool | y | Horizontal screen orientation |
+| `CONFIG_DONGLE_SCREEN_FLIPPED` | bool | n | Flip orientation 180° |
+| `CONFIG_DONGLE_SCREEN_SYSTEM_ICON` | int | 0 | GUI key icon: 0=macOS, 1=Linux, 2=Windows |
+| `CONFIG_DONGLE_SCREEN_AMBIENT_LIGHT` | bool | n | Auto-adjust brightness via APDS9960 sensor |
+| `CONFIG_DONGLE_SCREEN_IDLE_TIMEOUT_S` | int | 600 | Seconds before screen turns off (0=never) |
+| `CONFIG_DONGLE_SCREEN_MAX_BRIGHTNESS` | int | 80 | Max brightness (1–100) |
+| `CONFIG_DONGLE_SCREEN_MIN_BRIGHTNESS` | int | 1 | Min brightness (1–99) |
+| `CONFIG_DONGLE_SCREEN_DEFAULT_BRIGHTNESS` | int | MAX | Startup brightness |
+| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_MODIFIER` | int | 0 | Persistent brightness offset |
+| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_STEP` | int | 10 | Per-keystroke brightness adjustment step |
+| `CONFIG_DONGLE_SCREEN_TOGGLE_KEYCODE` | int | 113 | Toggle screen on/off (default: F22) |
+| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_KEYBOARD_CONTROL` | bool | y | Enable F23/F24 brightness keys |
+| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_UP_KEYCODE` | int | 115 | Brightness up keycode (default: F24) |
+| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_DOWN_KEYCODE` | int | 114 | Brightness down keycode (default: F23) |
+| `CONFIG_DONGLE_SCREEN_WPM_ACTIVE` | bool | y | Show WPM widget |
+| `CONFIG_DONGLE_SCREEN_MODIFIER_ACTIVE` | bool | y | Show modifier widget |
+| `CONFIG_DONGLE_SCREEN_LAYER_ACTIVE` | bool | y | Show layer widget |
+| `CONFIG_DONGLE_SCREEN_OUTPUT_ACTIVE` | bool | y | Show output widget |
+| `CONFIG_DONGLE_SCREEN_BATTERY_ACTIVE` | bool | y | Show battery widget |
+
+### Custom background image
+
+1. Export your image as PNG: **280×240** (horizontal) or **240×280** (vertical).
+2. Convert at [lvgl.io/tools/imageconverter](https://lvgl.io/tools/imageconverter): Color format `CF_TRUE_COLOR`, Output format `C Array`, **Swap color bytes** checked.
+3. Replace `boards/shields/dongle_screen/src/images/background.c` with the generated file, renaming the variable to `dongle_screen_background`.
+4. Add `CONFIG_DONGLE_SCREEN_BACKGROUND_IMAGE=y` to `boards/shields/totem/totem_dongle.conf`.
+5. Rebuild and flash the dongle.
+
+---
+
+## Keymap
+
+Six layers. Source: [`config/totem.keymap`](config/totem.keymap).
+
+| # | Layer | Hand | Activation |
+|---|---|---|---|
+| 0 | **BASE** | Both | Default |
+| 1 | **DEV** | Right | Hold `DEV/SPC` (right thumb inner) |
+| 2 | **SYS** | Right | Hold `SYS/TAB` (right thumb middle) |
+| 3 | **NUM** | Left | Hold `NUM/ENT` (left thumb middle) |
+| 4 | **FUN** | Left | Hold `FUN/DEL` (left thumb inner) |
+| 5 | **BOOT** | Both | Assign via ZMK Studio or combo |
+
+**BASE** — QWERTY with home-row mods (`GUI/S` `CTRL/D` `SHIFT/F` left; `SHIFT/J` `CTRL/K` `GUI/L` right). Left outer pinky: `HYPER` (Ctrl+Shift+Alt+GUI). Right outer pinky: `'`.
+
+**DEV** — Developer symbols on the right: `-{}` `` ` `` `=_[]'$&|*`. Left: modifiers. Right thumbs: `@()`. Right outer pinky: `Shift+Tab`.
+
+**SYS** — Navigation and media: arrows, volume, prev/next/play/mute, screenshots, refresh, undo/cut/copy/paste. Left outer pinky: clear all BT bonds. Right outer pinky: lock screen.
+
+**NUM** — Numpad on the left: `-789` / `=456` / `123`, `.0` on thumbs. Right: modifiers.
+
+**FUN** — Function keys: `F12 F7–F9` / `F11 F4–F6` / `F10 F1–F3`. `SPC/TAB` on thumbs. Right: modifiers.
+
+**BOOT** — `&sys_reset` on top-row outer keys, `&bootloader` on bottom-row outer keys. Both halves and the dongle respond. Activate via ZMK Studio.
+
+---
+
+## FAQ
+
+**Double-tap reset isn't working on a half or the dongle.**
+Double-tap is implemented in ZMK firmware — the XIAO bootloader alone may not support it. The firmware must be flashed at least once first. On a fresh XIAO with no firmware, hold the boot button while plugging in to enter bootloader manually.
+
+**The battery widget is showing left and right swapped.**
+The dongle assigns battery indicators in first-seen order. Flash `settings_reset` to the dongle, then reflash `totem_dongle` and re-pair: power on left first, wait for its indicator, then power on right.
+
+**One half shows as connected on the dongle screen but keystrokes aren't registering.**
+The half may have a stale BLE bond. Flash `settings_reset` to that half, then reflash normal firmware and re-pair.
+
+**The dongle screen is blank / not turning on.**
+Check that `CONFIG_DONGLE_SCREEN_IDLE_TIMEOUT_S` isn't 0 after a recent edit (that means never dim, which is correct, but 0 would mean instantly off in a broken build). If idle timeout is fine, the display brightness might be at 0 — press the brightness-up key (F24 by default).
+
+**How do I toggle the screen off/on?**
+Assign F22 to a key in your keymap via ZMK Studio. That keycode toggles the display. F23/F24 adjust brightness.
+
+**ZMK Studio shows "Keyboard Locked".**
+Shouldn't happen — Studio locking is disabled (`CONFIG_ZMK_STUDIO_LOCKING=n`). If it does, reflash `totem_dongle`.
+
+**The dongle connects but the keyboard halves won't pair.**
+Make sure you're not using `settings_reset` firmware accidentally. Confirm the correct `totem_left`/`totem_right` artifacts are flashed. Both halves need to be running peripheral firmware (not central).
+
+**How do I switch to the no-dongle setup?**
+Flash from [zmk-config-studio](https://github.com/Tyler-Reagan/zmk-config-studio) instead. Run `settings_reset` on both halves first to clear old dongle bonds, then reflash and re-pair normally.
+
+**GitHub Actions is failing.**
+Check the Actions tab. Common causes: keymap syntax error in `totem.keymap`, or a ZMK API change on `main`. Check the [ZMK changelog](https://zmk.dev/docs/changelog) for breaking changes.
+
+**Where do I find the built firmware without `make download`?**
+Go to the **Actions** tab in your GitHub repo → select the latest successful run → scroll to **Artifacts** at the bottom of the run summary.
+
+---
+
+## Credits
+
+The `dongle_screen` module is based on the original [zmk-dongle-screen](https://github.com/janpfischer/zmk-dongle-screen) by janpfischer, itself inspired by [prospector-zmk-module](https://github.com/carrefinho/prospector-zmk-module) and [zmk-dongle-display](https://github.com/englmaxi/zmk-dongle-display).
 
 ## License
 
-MIT License
-
----
-
-_This project is part of the ZMK community and licensed under the MIT License._
+MIT
