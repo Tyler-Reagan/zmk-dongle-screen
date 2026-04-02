@@ -27,7 +27,7 @@ The dongle display shows: output mode (USB/BLE), active layer, active modifiers,
 ```
 config/
   totem.keymap              ← keymap (edit this)
-  totem_left_dongle.conf    ← left peripheral config (bootloader support)
+  totem_left.conf    ← left peripheral config (bootloader support)
   totem_right.conf          ← right peripheral config (bootloader support)
   totem_dongle.conf         ← dongle config (bootloader support)
   west.yml                  ← ZMK west manifest
@@ -36,7 +36,7 @@ boards/shields/
   totem/                    ← TOTEM keyboard shield (dongle variants)
     totem.dtsi              ← base matrix / kscan
     totem-layouts.dtsi      ← physical key positions (ZMK Studio)
-    totem_left_dongle.overlay ← left half GPIO (peripheral mode)
+    totem_left.overlay ← left half GPIO (peripheral mode)
     totem_right.overlay     ← right half GPIO (peripheral mode)
     totem_dongle.overlay    ← dongle mock kscan
     totem_dongle.conf       ← dongle screen preferences (orientation, brightness, timeout)
