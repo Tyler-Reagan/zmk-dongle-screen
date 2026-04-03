@@ -156,7 +156,7 @@ static void set_battery_symbol(lv_obj_t *widget, struct battery_state state)
     if (state.level > 0)
     {
         lv_obj_set_style_text_color(label, lv_color_white(), 0);
-        lv_label_set_text_fmt(label, "%4u", state.level);
+        lv_label_set_text_fmt(label, "%u", state.level);
     }
     else
     {
@@ -172,12 +172,12 @@ static void set_battery_symbol(lv_obj_t *widget, struct battery_state state)
     else if (state.level <= 10)
     {
         lv_obj_set_style_text_color(label, lv_palette_main(LV_PALETTE_YELLOW), 0);
-        lv_label_set_text_fmt(label, "%4u", state.level);
+        lv_label_set_text_fmt(label, "%u", state.level);
     }
     else
     {
         lv_obj_set_style_text_color(label, lv_color_white(), 0);
-        lv_label_set_text_fmt(label, "%4u", state.level);
+        lv_label_set_text_fmt(label, "%u", state.level);
     }
 
     lv_obj_clear_flag(symbol, LV_OBJ_FLAG_HIDDEN);
