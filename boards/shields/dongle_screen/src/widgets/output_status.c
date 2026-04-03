@@ -43,40 +43,41 @@ static struct output_status_state get_state(const zmk_event_t *_eh)
         .usb_is_hid_ready = zmk_usb_is_hid_ready()};                       // 0 = not ready, 1 = ready
 }
 
+// status of dongle connection to client device, not the peripherals to the dongle
 static void set_status_symbol(struct zmk_widget_output_status *widget, struct output_status_state state)
 {
     const char *ble_color = "ffffff";
     const char *usb_color = "ffffff";
     char transport_text[50] = {};
-    if (state.usb_is_hid_ready == 0)
+    if (state.usb_is_hid_ready == 0) // not ready
     {
-        usb_color = "ff0000";
+        usb_color = "ff0000"; // red
     }
-    else
+    else // ready
     {
-        usb_color = "ffffff";
+        usb_color = "965fd4"; // purple
     }
 
-    if (state.active_profile_connected == 1)
+    if (state.active_profile_connected == 1) // connected
     {
-        ble_color = "00ff00";
+        ble_color = "965fd4"; // purple
     }
-    else if (state.active_profile_bonded == 1)
+    else if (state.active_profile_bonded == 1) // bonded
     {
-        ble_color = "0000ff";
+        ble_color = "0000ff"; // blue
     }
-    else
+    else // not connected
     {
-        ble_color = "ffffff";
+        ble_color = "ffffff"; // white
     }
 
     switch (state.selected_endpoint.transport)
     {
     case ZMK_TRANSPORT_USB:
-        snprintf(transport_text, sizeof(transport_text), "> #%s USB#\n#%s BLE#", usb_color, ble_color);
+        snprintf(transport_text, sizeof(transport_text), "* #%s USB#\n#%s BLE#", usb_color, ble_color);
         break;
     case ZMK_TRANSPORT_BLE:
-        snprintf(transport_text, sizeof(transport_text), "#%s USB#\n> #%s BLE#", usb_color, ble_color);
+        snprintf(transport_text, sizeof(transport_text), "#%s USB#\n* #%s BLE#", usb_color, ble_color);
         break;
     }
 
@@ -84,6 +85,7 @@ static void set_status_symbol(struct zmk_widget_output_status *widget, struct ou
     lv_obj_set_style_text_align(widget->transport_label, LV_TEXT_ALIGN_RIGHT, 0);
     lv_label_set_text(widget->transport_label, transport_text);
 
+    // peripheral profile selection is handled separately from the dongle connection
     char ble_text[12];
 
     snprintf(ble_text, sizeof(ble_text), "%d", state.active_profile_index + 1);
@@ -117,7 +119,7 @@ int zmk_widget_output_status_init(struct zmk_widget_output_status *widget, lv_ob
     lv_obj_set_style_text_font(widget->transport_label, &lv_font_montserrat_14, 0);
 
     widget->ble_label = lv_label_create(widget->obj);
-    lv_obj_align(widget->ble_label, LV_ALIGN_TOP_RIGHT, -10, 40);
+    lv_obj_align(widget->ble_label, LV_ALIGN_TOP_RIGHT, -10, 46);
     lv_obj_set_style_text_font(widget->ble_label, &lv_font_montserrat_14, 0);
 
     sys_slist_append(&widgets, &widget->node);
