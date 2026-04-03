@@ -19,8 +19,8 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
 #define WPM_BAR_WIDTH  10
-#define WPM_BAR_HEIGHT 60
-#define WPM_MAX        200
+#define WPM_BAR_HEIGHT 144
+#define WPM_MAX        120
 
 static lv_color_t wpm_bar_buffer[WPM_BAR_WIDTH * WPM_BAR_HEIGHT];
 
@@ -33,7 +33,7 @@ static void draw_wpm_bar(lv_obj_t *canvas, int wpm)
 
     lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_COVER);
 
-    for (int y = WPM_BAR_HEIGHT - fill; y < WPM_BAR_HEIGHT; y++) {
+    for (int y = 0; y < fill; y++) {
         for (int x = 0; x < WPM_BAR_WIDTH; x++) {
             lv_canvas_set_px(canvas, x, y, lv_color_hex(0xf09537), LV_OPA_COVER);
         }
@@ -57,7 +57,7 @@ static void set_wpm(struct zmk_widget_wpm_status *widget, struct wpm_status_stat
 {
 
     char wpm_text[12];
-    snprintf(wpm_text, sizeof(wpm_text), "WPM\n%i", state.wpm);
+    snprintf(wpm_text, sizeof(wpm_text), "%i", state.wpm);
     lv_label_set_text(widget->wpm_label, wpm_text);
     draw_wpm_bar(widget->wpm_bar, state.wpm);
 }
@@ -79,7 +79,7 @@ ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
 int zmk_widget_wpm_status_init(struct zmk_widget_wpm_status *widget, lv_obj_t *parent)
 {
     widget->obj = lv_obj_create(parent);
-    lv_obj_set_size(widget->obj, 240, 77);
+    lv_obj_set_size(widget->obj, 240, 168);
 
     widget->wpm_label = lv_label_create(widget->obj);
     lv_obj_align(widget->wpm_label, LV_ALIGN_TOP_LEFT, 0, 0);
@@ -87,7 +87,7 @@ int zmk_widget_wpm_status_init(struct zmk_widget_wpm_status *widget, lv_obj_t *p
 
     widget->wpm_bar = lv_canvas_create(widget->obj);
     lv_canvas_set_buffer(widget->wpm_bar, wpm_bar_buffer, WPM_BAR_WIDTH, WPM_BAR_HEIGHT, LV_COLOR_FORMAT_RGB565);
-    lv_obj_align(widget->wpm_bar, LV_ALIGN_LEFT_MID, 45, -13);
+    lv_obj_align(widget->wpm_bar, LV_ALIGN_TOP_LEFT, 0, 22);
     draw_wpm_bar(widget->wpm_bar, 0);
 
     // Only here as a sample
