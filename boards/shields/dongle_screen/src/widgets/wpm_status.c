@@ -34,7 +34,7 @@ static void set_wpm(struct zmk_widget_wpm_status *widget, struct wpm_status_stat
 {
 
     char wpm_text[12];
-    snprintf(wpm_text, sizeof(wpm_text), "WPM\n%i", state.wpm);
+    snprintf(wpm_text, sizeof(wpm_text), "%i", state.wpm);
     lv_label_set_text(widget->wpm_label, wpm_text);
 }
 
@@ -59,6 +59,7 @@ int zmk_widget_wpm_status_init(struct zmk_widget_wpm_status *widget, lv_obj_t *p
 
     widget->wpm_label = lv_label_create(widget->obj);
     lv_obj_align(widget->wpm_label, LV_ALIGN_TOP_LEFT, 0, 0);
+    lv_obj_set_style_text_color(widget->wpm_label, lv_color_hex(0x965fd4), 0);
 
     // Only here as a sample
     // widget->font_test = lv_label_create(widget->obj);
