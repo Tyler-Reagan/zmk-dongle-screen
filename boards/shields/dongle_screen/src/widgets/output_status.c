@@ -114,9 +114,11 @@ int zmk_widget_output_status_init(struct zmk_widget_output_status *widget, lv_ob
 
     widget->transport_label = lv_label_create(widget->obj);
     lv_obj_align(widget->transport_label, LV_ALIGN_TOP_RIGHT, -10, 10);
+    lv_obj_set_style_text_font(widget->transport_label, &lv_font_montserrat_14, 0);
 
     widget->ble_label = lv_label_create(widget->obj);
     lv_obj_align(widget->ble_label, LV_ALIGN_TOP_RIGHT, -10, 56);
+    lv_obj_set_style_text_font(widget->ble_label, &lv_font_montserrat_14, 0);
 
     sys_slist_append(&widgets, &widget->node);
 
