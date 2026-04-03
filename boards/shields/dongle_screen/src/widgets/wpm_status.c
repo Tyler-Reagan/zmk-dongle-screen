@@ -87,7 +87,7 @@ int zmk_widget_wpm_status_init(struct zmk_widget_wpm_status *widget, lv_obj_t *p
 
     widget->wpm_bar = lv_canvas_create(widget->obj);
     lv_canvas_set_buffer(widget->wpm_bar, wpm_bar_buffer, WPM_BAR_WIDTH, WPM_BAR_HEIGHT, LV_COLOR_FORMAT_RGB565);
-    lv_obj_align(widget->wpm_bar, LV_ALIGN_MID_LEFT, 45, 0);
+    lv_obj_align(widget->wpm_bar, LV_ALIGN_LEFT_MID, 45, -13);
     draw_wpm_bar(widget->wpm_bar, 0);
 
     // Only here as a sample
