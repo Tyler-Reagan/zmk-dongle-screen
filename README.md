@@ -12,11 +12,11 @@ Personal ZMK firmware for the [TOTEM](https://github.com/GEIGEIGEIST/TOTEM) — 
 
 Three XIAO nRF52840 boards:
 
-| Piece | Firmware artifact | Role |
-|---|---|---|
-| Left half | `totem_left` | BLE peripheral — sends key events to dongle |
-| Right half | `totem_right` | BLE peripheral — sends key events to dongle |
-| Dongle | `totem_dongle` | USB central — HID + ZMK Studio + ST7789V display |
+| Piece      | Firmware artifact | Role                                             |
+| ---------- | ----------------- | ------------------------------------------------ |
+| Left half  | `totem_left`      | BLE peripheral — sends key events to dongle      |
+| Right half | `totem_right`     | BLE peripheral — sends key events to dongle      |
+| Dongle     | `totem_dongle`    | USB central — HID + ZMK Studio + ST7789V display |
 
 The dongle display shows: output mode (USB/BLE), active layer, active modifiers, WPM, and battery levels for both halves.
 
@@ -109,6 +109,7 @@ make flash-dongle
 ```
 
 > The `BOOT_LEFT`, `BOOT_RIGHT`, and `BOOT_DONGLE` variables default to `/Volumes/XIAO-SENSE`. Override if needed:
+>
 > ```sh
 > make flash-dongle BOOT_DONGLE=/Volumes/XIAO
 > ```
@@ -178,34 +179,35 @@ CONFIG_DONGLE_SCREEN_MAX_BRIGHTNESS=80   # Max brightness (1–100)
 
 Full configuration reference:
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `CONFIG_DONGLE_SCREEN_HORIZONTAL` | bool | y | Horizontal screen orientation |
-| `CONFIG_DONGLE_SCREEN_FLIPPED` | bool | n | Flip orientation 180° |
-| `CONFIG_DONGLE_SCREEN_SYSTEM_ICON` | int | 0 | GUI key icon: 0=macOS, 1=Linux, 2=Windows |
-| `CONFIG_DONGLE_SCREEN_AMBIENT_LIGHT` | bool | n | Auto-adjust brightness via APDS9960 sensor |
-| `CONFIG_DONGLE_SCREEN_IDLE_TIMEOUT_S` | int | 600 | Seconds before screen turns off (0=never) |
-| `CONFIG_DONGLE_SCREEN_MAX_BRIGHTNESS` | int | 80 | Max brightness (1–100) |
-| `CONFIG_DONGLE_SCREEN_MIN_BRIGHTNESS` | int | 1 | Min brightness (1–99) |
-| `CONFIG_DONGLE_SCREEN_DEFAULT_BRIGHTNESS` | int | MAX | Startup brightness |
-| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_MODIFIER` | int | 0 | Persistent brightness offset |
-| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_STEP` | int | 10 | Per-keystroke brightness adjustment step |
-| `CONFIG_DONGLE_SCREEN_TOGGLE_KEYCODE` | int | 113 | Toggle screen on/off (default: F22) |
-| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_KEYBOARD_CONTROL` | bool | y | Enable F23/F24 brightness keys |
-| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_UP_KEYCODE` | int | 115 | Brightness up keycode (default: F24) |
-| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_DOWN_KEYCODE` | int | 114 | Brightness down keycode (default: F23) |
-| `CONFIG_DONGLE_SCREEN_WPM_ACTIVE` | bool | y | Show WPM widget |
-| `CONFIG_DONGLE_SCREEN_MODIFIER_ACTIVE` | bool | y | Show modifier widget |
-| `CONFIG_DONGLE_SCREEN_LAYER_ACTIVE` | bool | y | Show layer widget |
-| `CONFIG_DONGLE_SCREEN_OUTPUT_ACTIVE` | bool | y | Show output widget |
-| `CONFIG_DONGLE_SCREEN_BATTERY_ACTIVE` | bool | y | Show battery widget |
+| Option                                             | Type | Default | Description                                |
+| -------------------------------------------------- | ---- | ------- | ------------------------------------------ |
+| `CONFIG_DONGLE_SCREEN_HORIZONTAL`                  | bool | y       | Horizontal screen orientation              |
+| `CONFIG_DONGLE_SCREEN_FLIPPED`                     | bool | n       | Flip orientation 180°                      |
+| `CONFIG_DONGLE_SCREEN_SYSTEM_ICON`                 | int  | 0       | GUI key icon: 0=macOS, 1=Linux, 2=Windows  |
+| `CONFIG_DONGLE_SCREEN_AMBIENT_LIGHT`               | bool | n       | Auto-adjust brightness via APDS9960 sensor |
+| `CONFIG_DONGLE_SCREEN_IDLE_TIMEOUT_S`              | int  | 600     | Seconds before screen turns off (0=never)  |
+| `CONFIG_DONGLE_SCREEN_MAX_BRIGHTNESS`              | int  | 80      | Max brightness (1–100)                     |
+| `CONFIG_DONGLE_SCREEN_MIN_BRIGHTNESS`              | int  | 1       | Min brightness (1–99)                      |
+| `CONFIG_DONGLE_SCREEN_DEFAULT_BRIGHTNESS`          | int  | MAX     | Startup brightness                         |
+| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_MODIFIER`         | int  | 0       | Persistent brightness offset               |
+| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_STEP`             | int  | 10      | Per-keystroke brightness adjustment step   |
+| `CONFIG_DONGLE_SCREEN_TOGGLE_KEYCODE`              | int  | 113     | Toggle screen on/off (default: F22)        |
+| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_KEYBOARD_CONTROL` | bool | y       | Enable F23/F24 brightness keys             |
+| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_UP_KEYCODE`       | int  | 115     | Brightness up keycode (default: F24)       |
+| `CONFIG_DONGLE_SCREEN_BRIGHTNESS_DOWN_KEYCODE`     | int  | 114     | Brightness down keycode (default: F23)     |
+| `CONFIG_DONGLE_SCREEN_WPM_ACTIVE`                  | bool | y       | Show WPM widget                            |
+| `CONFIG_DONGLE_SCREEN_MODIFIER_ACTIVE`             | bool | y       | Show modifier widget                       |
+| `CONFIG_DONGLE_SCREEN_LAYER_ACTIVE`                | bool | y       | Show layer widget                          |
+| `CONFIG_DONGLE_SCREEN_OUTPUT_ACTIVE`               | bool | y       | Show output widget                         |
+| `CONFIG_DONGLE_SCREEN_BATTERY_ACTIVE`              | bool | y       | Show battery widget                        |
 
 ### Custom background image
 
 1. Export your image as PNG: **280×240** (horizontal) or **240×280** (vertical).
-2. Convert at [lvgl.io/tools/imageconverter](https://lvgl.io/tools/imageconverter): Color format `CF_TRUE_COLOR`, Output format `C Array`, **Swap color bytes** checked.
+2. Convert at [lvgl.io/tools/imageconverter](https://lvgl.io/tools/imageconverter): Color format `RGB565`. Make sure you use v9, **not** v8.
 3. Replace `boards/shields/dongle_screen/src/images/background.c` with the generated file, renaming the variable to `dongle_screen_background`.
 4. Add `CONFIG_DONGLE_SCREEN_BACKGROUND_IMAGE=y` to `boards/shields/totem/totem_dongle.conf`.
+
 5. Rebuild and flash the dongle.
 
 ---
@@ -214,14 +216,14 @@ Full configuration reference:
 
 Six layers. Source: [`config/totem.keymap`](config/totem.keymap).
 
-| # | Layer | Hand | Activation |
-|---|---|---|---|
-| 0 | **BASE** | Both | Default |
-| 1 | **DEV** | Right | Hold `DEV/SPC` (right thumb inner) |
-| 2 | **SYS** | Right | Hold `SYS/TAB` (right thumb middle) |
-| 3 | **NUM** | Left | Hold `NUM/ENT` (left thumb middle) |
-| 4 | **FUN** | Left | Hold `FUN/DEL` (left thumb inner) |
-| 5 | **BOOT** | Both | Assign via ZMK Studio or combo |
+| #   | Layer    | Hand  | Activation                          |
+| --- | -------- | ----- | ----------------------------------- |
+| 0   | **BASE** | Both  | Default                             |
+| 1   | **DEV**  | Right | Hold `DEV/SPC` (right thumb inner)  |
+| 2   | **SYS**  | Right | Hold `SYS/TAB` (right thumb middle) |
+| 3   | **NUM**  | Left  | Hold `NUM/ENT` (left thumb middle)  |
+| 4   | **FUN**  | Left  | Hold `FUN/DEL` (left thumb inner)   |
+| 5   | **BOOT** | Both  | Assign via ZMK Studio or combo      |
 
 **BASE** — QWERTY with home-row mods (`GUI/S` `CTRL/D` `SHIFT/F` left; `SHIFT/J` `CTRL/K` `GUI/L` right). Left outer pinky: `HYPER` (Ctrl+Shift+Alt+GUI). Right outer pinky: `'`.
 

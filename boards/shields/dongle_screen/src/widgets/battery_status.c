@@ -82,7 +82,6 @@ static bool is_peripheral_reconnecting(uint8_t source, uint8_t new_level)
 
 static void draw_battery(lv_obj_t *canvas, uint8_t level, bool usb_present)
 {
-
     if (level < 1)
     {
         lv_canvas_fill_bg(canvas, lv_palette_main(LV_PALETTE_RED), LV_OPA_COVER);
@@ -93,7 +92,7 @@ static void draw_battery(lv_obj_t *canvas, uint8_t level, bool usb_present)
     }
     else
     {
-        lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_COVER);
+        lv_canvas_fill_bg(canvas, lv_color_hex(0x8bd450), LV_OPA_COVER);
     }
 
     lv_draw_rect_dsc_t rect_fill_dsc;
@@ -153,17 +152,6 @@ static void set_battery_symbol(lv_obj_t *widget, struct battery_state state)
 
     draw_battery(symbol, state.level, state.usb_present);
 
-    if (state.level > 0)
-    {
-        lv_obj_set_style_text_color(label, lv_color_white(), 0);
-        lv_label_set_text_fmt(label, "%4u", state.level);
-    }
-    else
-    {
-        lv_obj_set_style_text_color(label, lv_palette_main(LV_PALETTE_RED), 0);
-        lv_label_set_text(label, "X");
-    }
-
     if (state.level < 1)
     {
         lv_obj_set_style_text_color(label, lv_palette_main(LV_PALETTE_RED), 0);
@@ -172,12 +160,12 @@ static void set_battery_symbol(lv_obj_t *widget, struct battery_state state)
     else if (state.level <= 10)
     {
         lv_obj_set_style_text_color(label, lv_palette_main(LV_PALETTE_YELLOW), 0);
-        lv_label_set_text_fmt(label, "%4u", state.level);
+        lv_label_set_text_fmt(label, "%u", state.level);
     }
     else
     {
-        lv_obj_set_style_text_color(label, lv_color_white(), 0);
-        lv_label_set_text_fmt(label, "%4u", state.level);
+        lv_obj_set_style_text_color(label, lv_color_hex(0x8bd450), 0);
+        lv_label_set_text_fmt(label, "%u", state.level);
     }
 
     lv_obj_clear_flag(symbol, LV_OBJ_FLAG_HIDDEN);
