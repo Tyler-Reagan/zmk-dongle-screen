@@ -231,22 +231,11 @@ config DONGLE_SCREEN_BACKGROUND_IMAGE
       the LVGL image converter (https://lvgl.io/tools/imageconverter).
       The exported variable must be named dongle_screen_background.
 
-choice DONGLE_SCREEN_PROFILE
-    prompt "Display profile"
-    default DONGLE_SCREEN_PROFILE_DEFAULT
+config DONGLE_SCREEN_SELECTED_PROFILE
+    string "Selected display profile"
+    default "default"
     help
-      Select the display profile (widget layout and background image).
-
-config DONGLE_SCREEN_PROFILE_DEFAULT
-    bool "Default"
-    help
-      Default display profile.
-
-config DONGLE_SCREEN_PROFILE_EVA
-    bool "Eva"
-    help
-      Eva display profile: purple/green color scheme with WPM bar and seele background.
-
-endchoice
+      Name of the profile directory under src/profiles/ to use for widgets and background image.
+      Example: "default" uses src/profiles/default/, "eva" uses src/profiles/eva/.
 
 endif

@@ -10,11 +10,7 @@ if(CONFIG_SHIELD_DONGLE_SCREEN)
   zephyr_library_include_directories(include)
   zephyr_library_include_directories(src)
 
-  if(CONFIG_DONGLE_SCREEN_PROFILE_EVA)
-    set(PROFILE_DIR src/profiles/eva)
-  else()
-    set(PROFILE_DIR src/profiles/default)
-  endif()
+  set(PROFILE_DIR src/profiles/${CONFIG_DONGLE_SCREEN_SELECTED_PROFILE})
 
   zephyr_library_include_directories(${PROFILE_DIR}/widgets)
   zephyr_library_sources(src/brightness.c)
