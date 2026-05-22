@@ -107,7 +107,7 @@ static void draw_battery(lv_obj_t *canvas, uint8_t level, bool usb_present)
 
     if (level <= 99 && level > 0)
     {
-        // Draw filled rectangle manually since lv_canvas_draw_rect doesn't exist in LVGL v8+
+        // Draw filled rectangle manually — lv_canvas_draw_rect was removed in LVGL v9
         for (int x = level; x < 100; x++)
         {
             for (int y = 1; y < 4; y++)
