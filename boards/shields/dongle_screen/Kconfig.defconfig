@@ -26,18 +26,21 @@ choice ZMK_DISPLAY_WORK_QUEUE
     default ZMK_DISPLAY_WORK_QUEUE_DEDICATED
 endchoice
 
-config ZMK_DISPLAY_DEDICATED_THREAD_STACK_SIZE
-    default 4096
-
 choice ST7789V_PIXEL_FORMAT
 	default ST7789V_RGB565
 endchoice
 
 config LV_Z_VDB_SIZE
-    default 100
+    default 50
+
+config LV_Z_DOUBLE_VDB
+    default y
+
+config LV_Z_FLUSH_THREAD
+    default y
 
 config LV_Z_MEM_POOL_SIZE
-    default 10000
+    default 16384
 
 config LV_DPI_DEF
     default 261
@@ -52,14 +55,14 @@ endchoice
 config LV_COLOR_16_SWAP
 	default y
 
-config LV_DISP_DEF_REFR_PERIOD
-    default 20
-
 choice LV_FONT_DEFAULT
     default LV_FONT_DEFAULT_MONTSERRAT_20
 endchoice
 
 config LV_FONT_MONTSERRAT_40
+    default y
+
+config LV_FONT_MONTSERRAT_14
     default y
 
 config PWM
@@ -216,4 +219,23 @@ config DONGLE_SCREEN_SYSTEM_ICON
     help
         The icon to display when the 'LGUI'/'RGUI' is pressed. Can be used to better match the Mod Widget to the underlying system.
         (0: macOS, 1: Linux, 2: Windows)
+
+config DONGLE_SCREEN_BACKGROUND_IMAGE
+    bool "Enable custom background image"
+    default n
+    help
+      When enabled, renders a custom background image behind all widgets.
+      Replace src/images/background.c with your own converted image.
+      The image must be 280x240 pixels (horizontal) or 240x280 (vertical),
+      in RGB565 format with byte-swap enabled, exported as a C array from
+      the LVGL image converter (https://lvgl.io/tools/imageconverter).
+      The exported variable must be named dongle_screen_background.
+
+config DONGLE_SCREEN_SELECTED_PROFILE
+    string "Selected display profile"
+    default "default"
+    help
+      Name of the profile directory under src/profiles/ to use for widgets and background image.
+      Example: "default" uses src/profiles/default/, "eva" uses src/profiles/eva/.
+
 endif
